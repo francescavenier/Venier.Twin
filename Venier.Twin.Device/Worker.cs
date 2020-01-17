@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.Devices.Client;
+using Microsoft.Azure.Devices.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Venier.Twin.Data;
 
 namespace Venier.Twin.Device
 {
@@ -14,7 +17,6 @@ namespace Venier.Twin.Device
     {
         private readonly ILogger<Worker> _logger;
         private readonly IConfiguration _configuration;
-
 
         public Worker(ILogger<Worker> logger, IConfiguration configuration)
         {
@@ -28,16 +30,23 @@ namespace Venier.Twin.Device
 
             var deviceClient =
                     DeviceClient.CreateFromConnectionString(
-                        _configuration.GetConnectionString("iothub"),
+                        _configuration.GetConnectionString("connectionString"),
                         TransportType.Amqp);
 
-            //var twin = await deviceClient.GetTwinAsync();
-            //var color = twin.Properties.Desired["color"];
-            //var x = (int)ConsoleColor.Yellow;
-            //Console.BackgroundColor = (ConsoleColor)14;
-            //twin.Properties.Reported["status"] = "ok";
-            //twin.Properties.Reported["dateChancheStatus"] = DateTime.Now.ToString();
-            //await deviceClient.UpdateReportedPropertiesAsync(twin.Properties.Reported);
+            // collegamento con twin
+            var twin = await deviceClient.GetTwinAsync();
+            var color = twin.Properties.Desired["color"];
+
+            // imposto il colore alla console
+            Console.BackgroundColor = color;
+            Console.Clear();
+
+            // leggere report
+            var reported = new TwinCollection();
+            reported["lastColor"] = Console.BackgroundColor.ToString();
+
+            //aggiorno il il reported
+            await deviceClient.UpdateReportedPropertiesAsync(reported);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -45,7 +54,11 @@ namespace Venier.Twin.Device
                 if (message != null)
                 {
                     var text = System.Text.UTF8Encoding.UTF8.GetString(message.GetBytes());
-                    Console.WriteLine("Messaggio: " + text);
+                    var json = JsonConvert.DeserializeObject<MessageMap>(text);
+                    Console.WriteLine("Messaggio: " + json.Text);
+
+                    int textColorId = json.TextColorId;
+                    Console.ForegroundColor = (ConsoleColor)textColorId;
                 }
                 else
                 {

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Azure.Devices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Venier.Twin.Data;
 
 namespace Venier.Twin.WebApp.Pages
 {
@@ -31,6 +33,12 @@ namespace Venier.Twin.WebApp.Pages
 
             [Required]
             public string Text { get; set; }
+
+            [Required]
+            public int ColorId { get; set; }
+
+            [Required]
+            public int TextColorId { get; set; }
         }
 
 
@@ -45,13 +53,34 @@ namespace Venier.Twin.WebApp.Pages
 
         }
 
+        // Scelta del colore
         public async Task<IActionResult> OnPost()
+        {
+            var registry = RegistryManager.CreateFromConnectionString(_configuration.GetConnectionString("connectionString"));
+            var twin = await registry.GetTwinAsync(Input.DeviceId);
+            twin.Properties.Desired["color"] = Input.ColorId;
+ 
+            await registry.UpdateTwinAsync("device1", twin, twin.ETag);
+            return RedirectToPage();
+        }
+
+        // Invio del messaggio
+        public async Task<IActionResult> OnPostMessage()
         {
             if (ModelState.IsValid)
             {
                 var serviceClient = ServiceClient.CreateFromConnectionString(
-                                        _configuration.GetConnectionString("iothub"),
+                                        _configuration.GetConnectionString("connectionString"),
                                         TransportType.Amqp);
+                var temp = new MessageMap();
+
+                temp.DeviceId = Input.DeviceId; 
+                temp.TextColorId = Input.TextColorId; 
+                temp.Text = Input.Text; 
+
+
+                var json = JsonConvert.SerializeObject(temp);
+
                 var text = System.Text.UTF8Encoding.UTF8.GetBytes(Input.Text);
                 var message = new Message(text);
 
@@ -61,14 +90,6 @@ namespace Venier.Twin.WebApp.Pages
 
                 return RedirectToPage();
             }
-
-
-            //var registry = RegistryManager.CreateFromConnectionString(_configuration.GetConnectionString("iothub"));
-            //var twin = await registry.GetTwinAsync("test1");
-            //twin.Properties.Desired["temperatura"] = 50;
-            //var status = twin.Properties.Reported["status"] as string;
-            //await registry.UpdateTwinAsync("test1", twin, twin.ETag);
-
             return Page();
         }
     }

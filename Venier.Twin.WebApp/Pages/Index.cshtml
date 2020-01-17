@@ -15,24 +15,43 @@
 }
 
 <form method="post">
-
     <div class="form-group">
         <label asp-for="Input.DeviceId"></label>
         <select asp-for="Input.DeviceId" asp-items="deviceList" class="form-control"></select>
-        @*<select asp-for="Input.DeviceId" class="form-control">
-                @foreach (var device in Model.Devices)
-                {
-                    <option value="@device">@device</option>
-                }
-            </select>*@
         <span asp-validation-for="Input.DeviceId" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Input.Text"></label>
-        <input asp-for="Input.Text" class="form-control" />
-        <span asp-validation-for="Input.Text" class="text-danger"></span>
+        <label asp-for="Input.ColorId"></label>
+        <select asp-for="Input.ColorId" class="form-control">
+            <option value="0">Nero</option>
+            <option value="1">Blu</option>
+            <option value="2">Verde</option>
+        </select>
+        <span asp-validation-for="Input.ColorId" class="text-danger"></span>
     </div>
 
+    <button type="submit" class="btn btn-primary">Invia</button>
+</form>
+
+<form method="post" asp-page-handler="Message">
+    <div class="form-group">
+        <label asp-for="Input.DeviceId"></label>
+        <select asp-for="Input.DeviceId" asp-items="deviceList" class="form-control"></select>
+        <span asp-validation-for="Input.DeviceId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Input.TextColorId"></label>
+        <select asp-for="Input.TextColorId" class="form-control">
+            <option value="0">Nero</option>
+            <option value="1">Blu</option>
+            <option value="2">Verde</option>
+        </select>
+        <span asp-validation-for="Input.TextColorId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Input.Text"></label>
+        <textarea asp-for="Input.Text" class="form-control"></textarea>
+    </div>
     <button type="submit" class="btn btn-primary">Invia</button>
 </form>
 
