@@ -2,9 +2,40 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+
+    var deviceList = Model.Devices.Select(d => new SelectListItem(d, d)).ToArray();
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (!string.IsNullOrWhiteSpace(Model.Message))
+{
+    <div class="alert alert-info mb-3" role="alert">
+        @Model.Message
+    </div>
+}
+
+<form method="post">
+
+    <div class="form-group">
+        <label asp-for="Input.DeviceId"></label>
+        <select asp-for="Input.DeviceId" asp-items="deviceList" class="form-control"></select>
+        @*<select asp-for="Input.DeviceId" class="form-control">
+                @foreach (var device in Model.Devices)
+                {
+                    <option value="@device">@device</option>
+                }
+            </select>*@
+        <span asp-validation-for="Input.DeviceId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Input.Text"></label>
+        <input asp-for="Input.Text" class="form-control" />
+        <span asp-validation-for="Input.Text" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Invia</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
