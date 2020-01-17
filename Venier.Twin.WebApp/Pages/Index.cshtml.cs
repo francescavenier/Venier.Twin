@@ -16,7 +16,7 @@ namespace Venier.Twin.WebApp.Pages
         private readonly ILogger<IndexModel> _logger;
         private readonly IConfiguration _configuration;
 
-        public string[] Devices = new string[] { "test1", "test2" };
+        public string[] Devices = new string[] { "device1", "device2" };
 
         [TempData]
         public string Message { get; set; }
